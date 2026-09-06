@@ -1,0 +1,206 @@
+[
+  {
+    "query": "Patient presents with Shrama – Fatigue, Arati – restlessness, Vivarnatva – discoloration of the skin, and Vairasya – bad taste in the mouth.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Jwara Purvarupa",
+      "verse_citation": "4-7",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with shivering (chill, rigours), non-corresponding time of onset and exacerbation, severe dryness of the throat and lips, and loss of sleep.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Vataja Jwara",
+      "verse_citation": "8-9",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with very high temperature, diarrhoea, very little sleep, and vomiting.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Pittaja Jwara",
+      "verse_citation": "10-11",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with feeling of stiffness / cold all over the body, mild increase of temperature, lack of enthusiasm, and sweet taste in the mouth.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Kaphaja Jwara",
+      "verse_citation": "12-13",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with thirst, fainting, giddiness, and burning sensation.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Vatapitta Jwara",
+      "verse_citation": "14-15",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with coating of the tongue, manifestation of bitter taste in the mouth, drowsiness, and delusion.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Kapha-pitta Jwara",
+      "verse_citation": "17",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with feeling of heat and cold alternately, pain in the bones and joints, headache, and eyes full of tears.",
+    "relevant_chapters": ["Jwara Nidana", "Jwara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 2,
+      "disease": "Jwara",
+      "subtype": "Sannipata Jwara",
+      "verse_citation": "13-23",
+      "url": "https://www.easyayurveda.com/jwara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with The premonitory symptoms of diarrhoea include – pricking type of pain in the region of the heart, umbilicus, rectum, and lower abdomen and flanks; weakness of the body.",
+    "relevant_chapters": ["Atisara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 3,
+      "disease": "Atisara",
+      "subtype": "Purvarupa – premonitory symptoms",
+      "verse_citation": "5",
+      "url": "https://www.easyayurveda.com/atisara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with Elimination of faeces which is slightly brown in colour, frothy, viscid, and less in quantity but expelled very frequently and is accompanied with pain and noise.",
+    "relevant_chapters": ["Atisara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 3,
+      "disease": "Atisara",
+      "subtype": "Vataja Atisara",
+      "verse_citation": "6",
+      "url": "https://www.easyayurveda.com/atisara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with Faeces which are deep yellow, blue or red in colour; the patient having thirst, fainting, and burning sensation and ulcerations (of the alimentary tract).",
+    "relevant_chapters": ["Atisara Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 3,
+      "disease": "Atisara",
+      "subtype": "Pittaja Atisara",
+      "verse_citation": "7",
+      "url": "https://www.easyayurveda.com/atisara-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with Unmada is basically of 6 types.",
+    "relevant_chapters": ["Unmada Nidana", "Unmada Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 20,
+      "disease": "Unmada",
+      "subtype": "Types of Unmada",
+      "verse_citation": "2-3",
+      "url": "https://www.easyayurveda.com/unmada-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with laughing, smiling, dancing, and singing.",
+    "relevant_chapters": ["Unmada Nidana", "Unmada Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 20,
+      "disease": "Unmada",
+      "subtype": "Vataja Unmada",
+      "verse_citation": "7-8",
+      "url": "https://www.easyayurveda.com/unmada-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with uncontrollability, casting away the clothes and remaining naked, threatening others, and running away (to beat / harm others) feeling of excessive heat in the body (burning sensation).",
+    "relevant_chapters": ["Unmada Nidana", "Unmada Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 20,
+      "disease": "Unmada",
+      "subtype": "Pittaja Unmada",
+      "verse_citation": "9-10",
+      "url": "https://www.easyayurveda.com/unmada-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with slow / weak / sluggish voice (or talk) and body movements, desire for women (or sex) and excessive sleep, saliva dribbling out, and symptoms pronounced immediately after taking food.",
+    "relevant_chapters": ["Unmada Nidana", "Unmada Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 20,
+      "disease": "Unmada",
+      "subtype": "Kaphaja Unmada",
+      "verse_citation": "11-12",
+      "url": "https://www.easyayurveda.com/unmada-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with excessive sleep, too much worry, loss of movements, and (feeling as if the body or affected parts have been covered by a wet leather or cloth).",
+    "relevant_chapters": ["Urustambha Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 24,
+      "disease": "Urustambha",
+      "subtype": "Purvarupa",
+      "verse_citation": "6",
+      "url": "https://www.easyayurveda.com/urustambha-nidanam/"
+    }
+  },
+  {
+    "query": "Patient presents with The general symptoms of amavata include – pain all over the body (in all parts of the body and joints), tastelessness, thirst, and laziness (loss of enthusiasm).",
+    "relevant_chapters": ["Vatavyadhi Chikitsa", "Grahani Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 25,
+      "disease": "Amavata",
+      "subtype": "Amavata Lakshanas",
+      "verse_citation": "6",
+      "url": "https://www.easyayurveda.com/2023/04/03/amavata-nidanam/"
+    }
+  },
+  {
+    "query": "Clinical presentation: In amavata associated with pitta there will be burning sensation and redness of the affected joint (part)",
+    "relevant_chapters": ["Vatavyadhi Chikitsa", "Grahani Chikitsa"],
+    "source": {
+      "text": "Madhava Nidana",
+      "chapter_number": 25,
+      "disease": "Amavata",
+      "subtype": "Pravruddha Amavata Lakshanas (part 2)",
+      "verse_citation": "11",
+      "url": "https://www.easyayurveda.com/2023/04/03/amavata-nidanam/"
+    }
+  }
+]
