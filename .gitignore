@@ -6,8 +6,6 @@ venv/
 
 .streamlit/
 
-data/rag-corpus/.embedding_cache/
-
 # OS / editor
 .DS_Store
 .vscode/
