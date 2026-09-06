@@ -23,7 +23,7 @@ from utils.progress import run_with_live_timer
 from utils.samples import load_sample_queries, sample_label
 
 st.set_page_config(
-    page_title="CharakaSetu",
+    page_title="Ayurvedic RAG Prototype",
     page_icon="🌿",
     layout="wide",
 )
@@ -42,13 +42,7 @@ QUERY_INPUT_KEY = "symptom_input"
 
 
 # --------------------------------------------------------------------------- #
-# Theming -- warm, Ayurvedic-inspired accents layered on top of Streamlit's
-# own theme variables, so it adapts correctly to light AND dark mode instead
-# of forcing one palette. Only the hero banner / button use fixed brand
-# colors (they're readable against either background by design); everything
-# else reads var(--background-color) / var(--secondary-background-color) /
-# var(--text-color), which Streamlit updates automatically when the user
-# switches themes.
+# Theming -- warm, Ayurvedic-inspired palette (turmeric / leaf green / cream)
 # --------------------------------------------------------------------------- #
 def inject_theme() -> None:
     st.markdown(
@@ -56,23 +50,21 @@ def inject_theme() -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&family=Noto+Sans+Devanagari:wght@500&display=swap');
 
-        html, body, [class*="css"] {
+        html, body, [class*="css"]  {
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Subtle themed wash behind the whole app -- derived from the
-           active theme's own colors, so it works in light and dark mode. */
         .stApp {
-            background: linear-gradient(160deg, var(--background-color) 0%, var(--secondary-background-color) 100%);
+            background: radial-gradient(circle at 10% 0%, #FBF3E1 0%, #F6ECD9 40%, #F1E6D0 100%);
         }
 
-        /* Hero banner -- fixed brand gradient, readable in either theme */
+        /* Hero banner */
         .ayur-hero {
-            background: linear-gradient(120deg, #4F6F45 0%, #7C9A63 55%, #C89B3C 100%);
+            background: linear-gradient(120deg, #5B7B4F 0%, #7C9A63 55%, #C89B3C 100%);
             border-radius: 18px;
             padding: 28px 32px;
             margin-bottom: 22px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 24px rgba(91, 66, 26, 0.18);
         }
         .ayur-hero h1 {
             font-family: 'Playfair Display', serif;
@@ -98,27 +90,87 @@ def inject_theme() -> None:
             margin-right: 8px;
         }
 
-        /* Info banner -- theme-aware */
+        /* Info banner */
         .ayur-note {
-            background: var(--secondary-background-color);
-            color: var(--text-color);
-            border-left: 4px solid #8FAE6E;
+            background: #EFF3E3;
+            border-left: 4px solid #6E8F52;
             border-radius: 8px;
             padding: 12px 16px;
             font-size: 0.92rem;
+            color: #3B4A2E;
             margin-bottom: 18px;
         }
+        
+        /* Retrieval pipeline */
+.pipeline-card {
+    background: #FFFDF7;
+    border: 1px solid #DCCFA3;
+    border-radius: 14px;
+    padding: 16px 14px;
+    margin: 10px 0 18px 0;
+    box-shadow: 0 3px 10px rgba(91, 66, 26, 0.07);
+}
 
-        /* Text area -- theme-aware background/text, fixed gold accent border */
+.pipeline-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #5B4526;
+    margin-bottom: 16px;
+}
+
+.pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 8px;
+    background: #F6F1E3;
+    border-radius: 10px;
+}
+
+.pipeline-number {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #6E8F52;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.pipeline-step-title {
+    color: #4A3410;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.pipeline-step-desc {
+    color: #7A6740;
+    font-size: 0.70rem;
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+.pipeline-arrow {
+    text-align: center;
+    color: #A9642B;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 3px 0;
+}
+
+        /* Text area */
         .stTextArea textarea {
-            border: 1.5px solid #C89B3C !important;
+            border: 1.5px solid #C9B37F !important;
             border-radius: 12px !important;
-            background-color: var(--secondary-background-color) !important;
-            color: var(--text-color) !important;
+            background-color: #FFFDF7 !important;
             font-size: 1rem !important;
         }
 
-        /* Primary button -- fixed brand gradient */
+        /* Primary button */
         div.stButton > button[kind="primary"] {
             background: linear-gradient(120deg, #A9642B 0%, #C89B3C 100%);
             border: none;
@@ -126,67 +178,67 @@ def inject_theme() -> None:
             padding: 0.6rem 1.6rem;
             font-weight: 600;
             color: #FFF8E7;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 12px rgba(169, 100, 43, 0.35);
         }
         div.stButton > button[kind="primary"]:hover {
-            filter: brightness(1.08);
+            filter: brightness(1.05);
         }
 
-        /* Expander (result cards) -- theme-aware */
+        /* Expander (result cards) */
         div[data-testid="stExpander"] {
-            background: var(--secondary-background-color);
-            border: 1px solid rgba(200, 155, 60, 0.35);
+            background: #FFFDF7;
+            border: 1px solid #E4D6AE;
             border-radius: 14px;
             margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(91, 66, 26, 0.06);
         }
         div[data-testid="stExpander"] summary {
             font-family: 'Playfair Display', serif;
             font-size: 1.05rem;
-            color: var(--text-color);
+            color: #5B4526;
         }
 
         .devanagari-text {
             font-family: 'Noto Sans Devanagari', sans-serif;
             font-size: 1.15rem;
-            color: var(--text-color);
-            background: var(--background-color);
+            color: #4A3410;
+            background: #FBF3E1;
             border-radius: 8px;
             padding: 10px 14px;
             border-left: 3px solid #C89B3C;
         }
         .iast-text {
             font-style: italic;
-            color: var(--text-color);
-            background: var(--background-color);
+            color: #6E5A34;
+            background: #F6EFDD;
             border-radius: 8px;
             padding: 8px 14px;
         }
 
-        /* Sidebar -- theme-aware */
+        /* Sidebar */
         section[data-testid="stSidebar"] {
-            background: var(--secondary-background-color);
+            background: linear-gradient(180deg, #EFEADA 0%, #E7E0C9 100%);
         }
 
-        /* Live status line (elapsed timer / completion summary) */
+        /* Live status line (completion summary) */
         .ayur-status {
-            color: var(--text-color);
-            opacity: 0.85;
+            color: #6E5A34;
+            opacity: 0.9;
             font-size: 0.9rem;
             margin: 4px 0 14px 0;
         }
 
-        /* Footer credit -- theme-aware */
+        /* Footer credit */
         .ayur-footer {
             text-align: center;
             margin-top: 36px;
             padding: 14px 0 6px 0;
-            border-top: 1px solid rgba(200, 155, 60, 0.35);
-            color: var(--text-color);
-            opacity: 0.75;
+            border-top: 1px solid #DCCFA3;
+            color: #7A6740;
             font-size: 0.85rem;
         }
         .ayur-footer a {
-            color: #C89B3C;
+            color: #7A4A1A;
             font-weight: 600;
             text-decoration: none;
         }
@@ -200,20 +252,18 @@ def inject_theme() -> None:
 
 
 def render_hero() -> None:
-        st.markdown(
-            f"""
-            <div class="ayur-hero">
-                <h1>🌿 CharakaSetu</h1>
-                <p>AI-powered retrieval of classical Ayurvedic knowledge from the
-                {SOURCE_LABEL} &mdash; describe a patient's symptoms in English and
-                discover relevant passages, verbatim.</p>
-                <span class="ayur-badge">Retrieval method: {RETRIEVER_LABEL}</span>
-                <span class="ayur-badge">Source: {SOURCE_LABEL}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
+    st.markdown(
+        f"""
+        <div class="ayur-hero">
+            <h1>🌿 CharakaSetu</h1>
+            <p>Grounded in the {SOURCE_LABEL} &mdash; describe a patient's symptoms in
+            English and retrieve the closest classical passages, verbatim.</p>
+            <span class="ayur-badge">Retrieval method: {RETRIEVER_LABEL}</span>
+            <span class="ayur-badge">Source: {SOURCE_LABEL}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_footer() -> None:
@@ -300,19 +350,48 @@ def results_to_json(results: list[RetrievalResult], query: str) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
-def render_export_section(results: list[RetrievalResult], query: str) -> None:
-    json_str = results_to_json(results, query)
+# st.dialog (native modal popups) was added in Streamlit 1.37. Feature-detect
+# so this still degrades gracefully on older versions instead of crashing.
+_HAS_DIALOG = hasattr(st, "dialog")
 
-    with st.expander("📋 Copy or download these results as JSON", expanded=False):
+if _HAS_DIALOG:
+
+    @st.dialog("📋 Results as JSON")
+    def _show_json_popup(json_str: str) -> None:
+        st.code(json_str, language="json")
+        st.caption("Use the copy icon in the top-right corner of the box above.")
         st.download_button(
-            label="⬇️ Download JSON",
+            "⬇️ Download JSON",
             data=json_str,
             file_name="ayurvedic_rag_results.json",
             mime="application/json",
-            use_container_width=False,
+            use_container_width=True,
         )
-        st.caption("Or use the copy icon in the top-right corner of the box below:")
-        st.code(json_str, language="json")
+
+else:
+
+    def _show_json_popup(json_str: str) -> None:  # pragma: no cover - old Streamlit fallback
+        with st.expander("📋 Results as JSON", expanded=True):
+            st.code(json_str, language="json")
+            st.caption("Use the copy icon in the top-right corner of the box above.")
+
+
+def render_export_bar(results: list[RetrievalResult], query: str) -> None:
+    """Compact download / copy-as-JSON controls -- no raw JSON on the page itself."""
+    json_str = results_to_json(results, query)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button(
+            "⬇️ Download as JSON",
+            data=json_str,
+            file_name="ayurvedic_rag_results.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+    with col2:
+        if st.button("📋 Copy as JSON", use_container_width=True):
+            _show_json_popup(json_str)
 
 
 def render_sample_picker() -> None:
@@ -342,7 +421,7 @@ def _load_and_query(query: str, top_k: int):
 
     Combining "make sure the pipeline is loaded" and "run the query" into
     one call means the user sees a single, honest elapsed timer covering
-    the whole request instead of two back-to-back progress widgets.
+    the whole request instead of two back-to-back widgets.
     """
     pipeline = get_pipeline()
     return pipeline.query(query, top_k=top_k)
@@ -364,18 +443,61 @@ def main() -> None:
         top_k = st.slider("Top-K results", min_value=1, max_value=50, value=10, step=1)
         st.divider()
         st.markdown(
-            "**Pipeline**\n\n"
-            "Query → JinaColBERT-v2 → MaxSim → ranked verse IDs → "
-            "corpus lookup → results"
-        )
-        st.caption(
-            "Pilot eval (not final): Recall@10 53.70% · MRR 0.511 · nDCG@10 0.435"
-        )
-        st.divider()
-        st.caption(
-            "⏱️ First run encodes the whole corpus, which can take a while "
-            "on CPU. Consider running `scripts/precompute_embeddings.py` "
-            "ahead of time (see README) to skip that wait here."
+            """
+            <div class="pipeline-card">
+                <div class="pipeline-title">🔄 Retrieval Pipeline</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-number">1</div>
+                    <div>
+                        <div class="pipeline-step-title">Patient Query</div>
+                        <div class="pipeline-step-desc">
+                            English symptoms / clinical complaint
+                        </div>
+                    </div>
+                </div>
+                <div class="pipeline-arrow">↓</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-number">2</div>
+                    <div>
+                        <div class="pipeline-step-title">JinaColBERT-v2</div>
+                        <div class="pipeline-step-desc">
+                            Semantic retrieval
+                        </div>
+                    </div>
+                </div>
+                <div class="pipeline-arrow">↓</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-number">3</div>
+                    <div>
+                        <div class="pipeline-step-title">MaxSim</div>
+                        <div class="pipeline-step-desc">
+                            Passage relevance scoring
+                        </div>
+                    </div>
+                </div>
+                <div class="pipeline-arrow">↓</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-number">4</div>
+                    <div>
+                        <div class="pipeline-step-title">Ranked Verse IDs</div>
+                        <div class="pipeline-step-desc">
+                            Results ordered by relevance
+                        </div>
+                    </div>
+                </div>
+                <div class="pipeline-arrow">↓</div>
+                <div class="pipeline-step">
+                    <div class="pipeline-number">5</div>
+                    <div>
+                        <div class="pipeline-step-title">Corpus Lookup</div>
+                        <div class="pipeline-step-desc">
+                            Retrieve passages from Charaka Samhita
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     render_sample_picker()
@@ -392,44 +514,54 @@ def main() -> None:
 
     search_clicked = st.button("🔎 Retrieve Relevant Knowledge", type="primary")
 
-    if not search_clicked:
-        render_footer()
-        return
+    # Run a new search only when the search button itself was just clicked.
+    # Any OTHER widget (e.g. the "Copy as JSON" button) also triggers a full
+    # script rerun, during which `search_clicked` is False again -- without
+    # persisting results in session_state, that rerun would wipe this whole
+    # section before the copy popup ever got a chance to open.
+    if search_clicked:
+        if not query or not query.strip():
+            st.warning("Please enter a patient symptom description before searching.")
+            st.session_state.pop("last_results", None)
+        else:
+            try:
+                timed = run_with_live_timer(
+                    _load_and_query,
+                    query,
+                    top_k,
+                    label="Retrieving relevant knowledge from the Charaka Samhita...",
+                )
+            except PipelineError as e:
+                st.session_state.pop("last_results", None)
+                st.session_state["last_error"] = str(e)
+            except Exception as e:  # noqa: BLE001 - last-resort guard for the UI
+                st.session_state.pop("last_results", None)
+                st.session_state["last_error"] = f"Unexpected error during retrieval: {e}"
+            else:
+                st.session_state.pop("last_error", None)
+                st.session_state["last_results"] = timed.value
+                st.session_state["last_query"] = query
+                st.session_state["last_elapsed"] = timed.elapsed_seconds
+                st.session_state["last_completed_at"] = timed.completed_at
 
-    if not query or not query.strip():
-        st.warning("Please enter a patient symptom description before searching.")
-        render_footer()
-        return
+    if st.session_state.get("last_error"):
+        st.error(st.session_state["last_error"])
 
-    try:
-        timed = run_with_live_timer(
-            _load_and_query,
-            query,
-            top_k,
-            label="Retrieving relevant knowledge from the Charaka Samhita...",
+    results = st.session_state.get("last_results")
+    if results:
+        st.markdown(
+            f'<div class="ayur-status">✅ Completed in '
+            f'<b>{st.session_state["last_elapsed"]:0.1f}s</b> '
+            f'&nbsp;·&nbsp; finished at <b>{st.session_state["last_completed_at"]}</b></div>',
+            unsafe_allow_html=True,
         )
-    except PipelineError as e:
-        st.error(str(e))
-        render_footer()
-        return
-    except Exception as e:  # noqa: BLE001 - last-resort guard for the UI
-        st.error(f"Unexpected error during retrieval: {e}")
-        render_footer()
-        return
 
-    results = timed.value
-    st.markdown(
-        f'<div class="ayur-status">✅ Completed in <b>{timed.elapsed_seconds:0.1f}s</b> '
-        f"&nbsp;·&nbsp; finished at <b>{timed.completed_at}</b></div>",
-        unsafe_allow_html=True,
-    )
+        st.subheader(f"🌱 Top {len(results)} results")
 
-    st.subheader(f"🌱 Top {len(results)} results")
+        render_export_bar(results, st.session_state.get("last_query", query))
 
-    render_export_section(results, query)
-
-    for result in results:
-        render_result_card(result)
+        for result in results:
+            render_result_card(result)
 
     render_footer()
 

@@ -2,11 +2,12 @@
 utils/progress.py
 
 Runs a slow function call (model load + retrieval) in a background thread
-while showing the user an *honest* live status: elapsed time and the
-current wall-clock time, both ticking in real time. No fake percentage or
-guessed ETA -- a prior version of this tried to estimate completion time
-and just froze near 100% once the guess was wrong, which was worse than
-showing nothing.
+while showing the user a live, honest status: elapsed time and the current
+wall-clock time, both ticking in real time. No fake percentage or guessed
+ETA -- with retrieval time varying a lot by hardware and corpus size, a
+guessed completion percentage either finishes early (looks broken) or
+stalls near 100% while still working (looks frozen). A plain elapsed
+counter is always accurate.
 
 After the call finishes, the caller gets the elapsed duration and the
 completion timestamp back so it can show a short "Completed in Xs at
@@ -41,7 +42,7 @@ def run_with_live_timer(
 ) -> TimedResult[T]:
     """
     Run fn(*args, **kwargs) in a background thread while rendering a live
-    "Elapsed: Xs | Now: HH:MM:SS" status line. Any exception raised inside
+    "Elapsed: Xs · Now: HH:MM:SS" status line. Any exception raised inside
     fn propagates to the caller (via future.result()) once the thread ends.
     """
     status_slot = st.empty()
