@@ -12,3 +12,4 @@ venv/
 .idea/
 
 models/
+local-sharing.txt

@@ -23,8 +23,8 @@ from utils.progress import run_with_live_timer
 from utils.samples import load_sample_queries, sample_label
 
 st.set_page_config(
-    page_title="Ayurvedic RAG Prototype",
-    page_icon="🌿",
+    page_title="CharakaSetu",
+    page_icon="data/logo.png",
     layout="wide",
 )
 
@@ -42,203 +42,325 @@ QUERY_INPUT_KEY = "symptom_input"
 
 
 # --------------------------------------------------------------------------- #
-# Theming -- warm, Ayurvedic-inspired palette (turmeric / leaf green / cream)
+# Theming -- editorial / archival aesthetic: restrained ink-and-gold palette,
+# hairline borders instead of shadows or glows, a serif/sans pairing (Lora +
+# Inter) suited to a scholarly research tool rather than a consumer app.
+# Colors read from Streamlit's own theme variables so light/dark mode both
+# work correctly; only the hero band keeps a fixed brand color deliberately.
 # --------------------------------------------------------------------------- #
 def inject_theme() -> None:
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&family=Noto+Sans+Devanagari:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@500;600&display=swap');
 
-        html, body, [class*="css"]  {
-            font-family: 'Poppins', sans-serif;
+        :root {
+            --ayur-ink: #22301D;
+            --ayur-ink-soft: #37472F;
+            --ayur-gold: #A98346;
+            --ayur-hairline: rgba(140, 120, 90, 0.28);
+        }
+
+        html, body, [class*="css"] {
+            font-family: 'Inter', sans-serif;
         }
 
         .stApp {
-            background: radial-gradient(circle at 10% 0%, #FBF3E1 0%, #F6ECD9 40%, #F1E6D0 100%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent 220px),
+                var(--background-color);
         }
 
-        /* Hero banner */
+        /* ---------- Hero ---------- */
         .ayur-hero {
-            background: linear-gradient(120deg, #5B7B4F 0%, #7C9A63 55%, #C89B3C 100%);
-            border-radius: 18px;
-            padding: 28px 32px;
-            margin-bottom: 22px;
-            box-shadow: 0 8px 24px rgba(91, 66, 26, 0.18);
+            background: var(--ayur-ink);
+            border-radius: 6px;
+            padding: 38px 42px 28px 42px;
+            margin-bottom: 26px;
+            border-bottom: 3px solid var(--ayur-gold);
+        }
+        .ayur-kicker {
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ayur-gold);
+            font-weight: 600;
+            margin-bottom: 10px;
         }
         .ayur-hero h1 {
-            font-family: 'Playfair Display', serif;
-            color: #FFF8E7;
-            font-size: 2.1rem;
-            margin: 0 0 6px 0;
+            font-family: 'Lora', serif;
+            font-weight: 700;
+            color: #F6F1E6;
+            font-size: 2.05rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 0.2px;
         }
         .ayur-hero p {
-            color: #FBF3E1;
-            font-size: 1rem;
-            margin: 0;
-            opacity: 0.95;
+            color: rgba(246, 241, 230, 0.78);
+            font-size: 0.97rem;
+            margin: 0 0 18px 0;
+            max-width: 620px;
+            line-height: 1.55;
         }
-        .ayur-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.18);
-            color: #FFF8E7;
-            border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 999px;
-            padding: 3px 12px;
-            font-size: 0.8rem;
-            margin-top: 10px;
-            margin-right: 8px;
+        .ayur-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(246, 241, 230, 0.16);
         }
-
-        /* Info banner */
-        .ayur-note {
-            background: #EFF3E3;
-            border-left: 4px solid #6E8F52;
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 0.92rem;
-            color: #3B4A2E;
-            margin-bottom: 18px;
+        .ayur-meta-item {
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: rgba(246, 241, 230, 0.55);
         }
-        
-        /* Retrieval pipeline */
-.pipeline-card {
-    background: #FFFDF7;
-    border: 1px solid #DCCFA3;
-    border-radius: 14px;
-    padding: 16px 14px;
-    margin: 10px 0 18px 0;
-    box-shadow: 0 3px 10px rgba(91, 66, 26, 0.07);
-}
-
-.pipeline-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #5B4526;
-    margin-bottom: 16px;
-}
-
-.pipeline-step {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 9px 8px;
-    background: #F6F1E3;
-    border-radius: 10px;
-}
-
-.pipeline-number {
-    min-width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #6E8F52;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-.pipeline-step-title {
-    color: #4A3410;
-    font-size: 0.84rem;
-    font-weight: 600;
-}
-
-.pipeline-step-desc {
-    color: #7A6740;
-    font-size: 0.70rem;
-    margin-top: 2px;
-    line-height: 1.3;
-}
-
-.pipeline-arrow {
-    text-align: center;
-    color: #A9642B;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 3px 0;
-}
-
-        /* Text area */
-        .stTextArea textarea {
-            border: 1.5px solid #C9B37F !important;
-            border-radius: 12px !important;
-            background-color: #FFFDF7 !important;
-            font-size: 1rem !important;
-        }
-
-        /* Primary button */
-        div.stButton > button[kind="primary"] {
-            background: linear-gradient(120deg, #A9642B 0%, #C89B3C 100%);
-            border: none;
-            border-radius: 999px;
-            padding: 0.6rem 1.6rem;
+        .ayur-meta-item b {
+            color: #F6F1E6;
             font-weight: 600;
-            color: #FFF8E7;
-            box-shadow: 0 4px 12px rgba(169, 100, 43, 0.35);
+            letter-spacing: 0.01em;
+        }
+
+        /* ---------- Info note ---------- */
+        .ayur-note {
+            background: var(--secondary-background-color);
+            color: var(--text-color);
+            border: 1px solid var(--ayur-hairline);
+            border-left: 3px solid var(--ayur-gold);
+            border-radius: 4px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            margin-bottom: 22px;
+            opacity: 0.94;
+        }
+        .ayur-note b {
+            color: var(--ayur-gold);
+        }
+
+        /* ---------- Sidebar ---------- */
+        section[data-testid="stSidebar"] {
+            background: var(--secondary-background-color);
+            border-right: 1px solid var(--ayur-hairline);
+        }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.76rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            opacity: 0.65;
+            font-weight: 700;
+        }
+
+        /* Retrieval pipeline -- vertical timeline, not colored badges */
+        .pipeline-title {
+            font-size: 0.76rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            opacity: 0.65;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .pipeline-step {
+            display: flex;
+            gap: 12px;
+            padding: 0 0 18px 0;
+            position: relative;
+        }
+        .pipeline-step:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            left: 11px;
+            top: 25px;
+            bottom: -3px;
+            width: 1px;
+            background: var(--ayur-hairline);
+        }
+        .pipeline-number {
+            min-width: 23px;
+            height: 23px;
+            border-radius: 2px;
+            border: 1px solid var(--ayur-gold);
+            color: var(--ayur-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.66rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            background: var(--background-color);
+            flex-shrink: 0;
+        }
+        .pipeline-step-title {
+            color: var(--text-color);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+        .pipeline-step-desc {
+            color: var(--text-color);
+            opacity: 0.58;
+            font-size: 0.72rem;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        /* ---------- Text area ---------- */
+        .stTextArea textarea {
+            border: 1px solid var(--ayur-hairline) !important;
+            border-radius: 4px !important;
+            background-color: var(--secondary-background-color) !important;
+            color: var(--text-color) !important;
+            font-size: 0.96rem !important;
+            transition: border-color 0.12s ease;
+        }
+        .stTextArea textarea:focus {
+            border-color: var(--ayur-gold) !important;
+            box-shadow: none !important;
+        }
+
+        /* ---------- Buttons ---------- */
+        div.stButton > button[kind="primary"] {
+            background: var(--ayur-ink);
+            border: 1px solid var(--ayur-ink);
+            border-radius: 4px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
+            color: #F6F1E6;
+            box-shadow: none;
+            transition: background 0.12s ease, border-color 0.12s ease;
         }
         div.stButton > button[kind="primary"]:hover {
-            filter: brightness(1.05);
+            background: var(--ayur-ink-soft);
+            border-color: var(--ayur-gold);
         }
 
-        /* Expander (result cards) */
+        div.stButton > button:not([kind="primary"]),
+        div.stDownloadButton > button {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--ayur-hairline);
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            box-shadow: none;
+            transition: border-color 0.12s ease, background 0.12s ease;
+        }
+        div.stButton > button:not([kind="primary"]):hover,
+        div.stDownloadButton > button:hover {
+            border-color: var(--ayur-gold);
+            background: var(--secondary-background-color);
+        }
+
+        /* ---------- Result cards ---------- */
         div[data-testid="stExpander"] {
-            background: #FFFDF7;
-            border: 1px solid #E4D6AE;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(91, 66, 26, 0.06);
+            background: var(--secondary-background-color);
+            border: 1px solid var(--ayur-hairline);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-shadow: none;
         }
         div[data-testid="stExpander"] summary {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.05rem;
-            color: #5B4526;
+            font-family: 'Lora', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-color);
         }
 
         .devanagari-text {
-            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-family: 'Noto Serif Devanagari', serif;
             font-size: 1.15rem;
-            color: #4A3410;
-            background: #FBF3E1;
-            border-radius: 8px;
-            padding: 10px 14px;
-            border-left: 3px solid #C89B3C;
+            color: var(--text-color);
+            border-left: 2px solid var(--ayur-gold);
+            padding: 4px 0 4px 16px;
+            line-height: 1.8;
+            background: transparent;
         }
         .iast-text {
             font-style: italic;
-            color: #6E5A34;
-            background: #F6EFDD;
-            border-radius: 8px;
-            padding: 8px 14px;
+            color: var(--text-color);
+            opacity: 0.72;
+            padding: 2px 0 2px 16px;
+            background: transparent;
+            font-size: 0.92rem;
         }
 
-        /* Sidebar */
-        section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #EFEADA 0%, #E7E0C9 100%);
+        /* ---------- Result card: slim metadata list + content blocks ---------- */
+        .ayur-meta-table {
+            margin-bottom: 14px;
+        }
+        .ayur-meta-row {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--ayur-hairline);
+        }
+        .ayur-meta-row:last-child {
+            border-bottom: none;
+        }
+        .ayur-meta-row .label {
+            flex: 0 0 128px;
+            font-size: 0.66rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            opacity: 0.5;
+        }
+        .ayur-meta-row .value {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.85rem;
+            color: var(--text-color);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .ayur-meta-row .value a {
+            color: var(--ayur-gold);
+            text-decoration: none;
+        }
+        .ayur-meta-row .value a:hover {
+            text-decoration: underline;
+        }
+        .ayur-block-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            opacity: 0.55;
+            font-weight: 600;
+            margin: 12px 0 6px 0;
+        }
+        .ayur-translation {
+            color: var(--text-color);
+            font-size: 0.94rem;
+            line-height: 1.6;
         }
 
-        /* Live status line (completion summary) */
+        /* ---------- Status + footer ---------- */
         .ayur-status {
-            color: #6E5A34;
-            opacity: 0.9;
-            font-size: 0.9rem;
-            margin: 4px 0 14px 0;
+            color: var(--text-color);
+            opacity: 0.62;
+            font-size: 0.82rem;
+            margin: 2px 0 16px 0;
+            letter-spacing: 0.01em;
         }
 
-        /* Footer credit */
         .ayur-footer {
             text-align: center;
-            margin-top: 36px;
-            padding: 14px 0 6px 0;
-            border-top: 1px solid #DCCFA3;
-            color: #7A6740;
-            font-size: 0.85rem;
+            margin-top: 40px;
+            padding: 16px 0 4px 0;
+            border-top: 1px solid var(--ayur-hairline);
+            color: var(--text-color);
+            opacity: 0.55;
+            font-size: 0.78rem;
         }
         .ayur-footer a {
-            color: #7A4A1A;
+            color: var(--ayur-gold);
             font-weight: 600;
             text-decoration: none;
         }
@@ -255,11 +377,15 @@ def render_hero() -> None:
     st.markdown(
         f"""
         <div class="ayur-hero">
-            <h1>🌿 CharakaSetu</h1>
-            <p>Grounded in the {SOURCE_LABEL} &mdash; describe a patient's symptoms in
-            English and retrieve the closest classical passages, verbatim.</p>
-            <span class="ayur-badge">Retrieval method: {RETRIEVER_LABEL}</span>
-            <span class="ayur-badge">Source: {SOURCE_LABEL}</span>
+            <div class="ayur-kicker">Classical Text Retrieval</div>
+            <h1>CharakaSetu</h1>
+            <p>A retrieval interface over the {SOURCE_LABEL}. Describe a patient's
+            symptoms in English to surface the closest classical passages,
+            verbatim and unaltered.</p>
+            <div class="ayur-meta">
+                <div class="ayur-meta-item">Retriever&nbsp; <b>{RETRIEVER_LABEL}</b></div>
+                <div class="ayur-meta-item">Source&nbsp; <b>{SOURCE_LABEL}</b></div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -289,34 +415,68 @@ def get_pipeline() -> RagPipeline:
 
 def render_result_card(result: RetrievalResult) -> None:
     with st.expander(result_card_title(result), expanded=(result.rank <= 3)):
-        st.markdown(f"**Sthana:** {result.sthana or '-'}")
+        source_value = (
+            f'<a href="{result.source_url}" target="_blank">'
+            f'{truncate(result.source_url, 55)}</a>'
+            if result.source_url
+            else "-"
+        )
 
-        if result.heading_path:
-            st.markdown(f"**Section:** {result.heading_path}")
+        # Slim metadata list -- one row per short/identifying corpus field,
+        # labeled with the corpus's own column names (or the closest plain-
+        # English equivalent) so nothing is ambiguous or renamed unclearly.
+        st.markdown(
+            f"""
+            <div class="ayur-meta-table">
+                <div class="ayur-meta-row">
+                    <span class="label">Verse ID</span>
+                    <span class="value">{result.verse_id or "-"}</span>
+                </div>
+                <div class="ayur-meta-row">
+                    <span class="label">Chapter Title</span>
+                    <span class="value">{result.chapter_title or "-"}</span>
+                </div>
+                <div class="ayur-meta-row">
+                    <span class="label">Sthana</span>
+                    <span class="value">{result.sthana or "-"}</span>
+                </div>
+                <div class="ayur-meta-row">
+                    <span class="label">Heading Path</span>
+                    <span class="value">{result.heading_path or "-"}</span>
+                </div>
+                <div class="ayur-meta-row">
+                    <span class="label">Verse Numbers</span>
+                    <span class="value">{format_verse_numbers(result.verse_numbers_list)}</span>
+                </div>
+                <div class="ayur-meta-row">
+                    <span class="label">Source URL</span>
+                    <span class="value">{source_value}</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        st.markdown("**Sanskrit**")
+        # Long-form content fields keep their own labeled block rather than
+        # a table row, since Sanskrit/IAST/translation text needs room to
+        # breathe and doesn't fit a single line.
+        st.markdown('<div class="ayur-block-label">Devanagari</div>', unsafe_allow_html=True)
         st.markdown(
             f'<div class="devanagari-text">{result.devanagari or "-"}</div>',
             unsafe_allow_html=True,
         )
 
         if result.iast:
-            st.markdown("**IAST (transliteration)**")
+            st.markdown('<div class="ayur-block-label">IAST</div>', unsafe_allow_html=True)
             st.markdown(
                 f'<div class="iast-text">{result.iast}</div>', unsafe_allow_html=True
             )
 
-        st.markdown("**English Translation**")
-        st.markdown(result.translation or "-")
-
-        footer_col1, footer_col2 = st.columns(2)
-        with footer_col1:
-            st.caption(f"Verse: {format_verse_numbers(result.verse_numbers_list)}")
-        with footer_col2:
-            if result.source_url:
-                st.caption(f"Source: [{truncate(result.source_url, 60)}]({result.source_url})")
-            else:
-                st.caption("Source: -")
+        st.markdown('<div class="ayur-block-label">Translation</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="ayur-translation">{result.translation or "-"}</div>',
+            unsafe_allow_html=True,
+        )
 
 
 def results_to_json(results: list[RetrievalResult], query: str) -> str:
@@ -356,22 +516,22 @@ _HAS_DIALOG = hasattr(st, "dialog")
 
 if _HAS_DIALOG:
 
-    @st.dialog("📋 Results as JSON")
+    @st.dialog("Results as JSON")
     def _show_json_popup(json_str: str) -> None:
         st.code(json_str, language="json")
         st.caption("Use the copy icon in the top-right corner of the box above.")
         st.download_button(
-            "⬇️ Download JSON",
+            "Download JSON",
             data=json_str,
             file_name="ayurvedic_rag_results.json",
             mime="application/json",
-            use_container_width=True,
+            width=True,
         )
 
 else:
 
     def _show_json_popup(json_str: str) -> None:  # pragma: no cover - old Streamlit fallback
-        with st.expander("📋 Results as JSON", expanded=True):
+        with st.expander("Results as JSON", expanded=True):
             st.code(json_str, language="json")
             st.caption("Use the copy icon in the top-right corner of the box above.")
 
@@ -383,14 +543,14 @@ def render_export_bar(results: list[RetrievalResult], query: str) -> None:
     col1, col2 = st.columns(2)
     with col1:
         st.download_button(
-            "⬇️ Download as JSON",
+            "Download as JSON",
             data=json_str,
             file_name="ayurvedic_rag_results.json",
             mime="application/json",
-            use_container_width=True,
+            width='stretch',
         )
     with col2:
-        if st.button("📋 Copy as JSON", use_container_width=True):
+        if st.button("Copy as JSON", width='stretch'):
             _show_json_popup(json_str)
 
 
@@ -399,7 +559,7 @@ def render_sample_picker() -> None:
     if not samples:
         return
 
-    options = ["— Select a sample case —"] + [sample_label(s) for s in samples]
+    options = ["Select a sample case..."] + [sample_label(s) for s in samples]
 
     def _apply_sample() -> None:
         idx = st.session_state.get("_sample_choice_idx", 0)
@@ -407,7 +567,7 @@ def render_sample_picker() -> None:
             st.session_state[QUERY_INPUT_KEY] = samples[idx - 1]["query"]
 
     st.selectbox(
-        "📚 Try a sample case",
+        "Try a sample case",
         options=range(len(options)),
         format_func=lambda i: options[i],
         index=0,
@@ -432,67 +592,62 @@ def main() -> None:
     render_hero()
 
     st.markdown(
-        '<div class="ayur-note">ℹ️ This tool retrieves relevant passages only. '
-        "It does not generate medical claims, diagnoses, or treatment "
-        "recommendations.</div>",
+        '<div class="ayur-note"><b>Note</b> &mdash; This tool retrieves relevant '
+        "passages only. It does not generate medical claims, diagnoses, or "
+        "treatment recommendations.</div>",
         unsafe_allow_html=True,
     )
 
     with st.sidebar:
-        st.header("🍃 Settings")
+        st.image("data/logo.png", width='stretch')
+        st.header("Settings")
         top_k = st.slider("Top-K results", min_value=1, max_value=50, value=10, step=1)
         st.divider()
         st.markdown(
             """
-            <div class="pipeline-card">
-                <div class="pipeline-title">🔄 Retrieval Pipeline</div>
-                <div class="pipeline-step">
-                    <div class="pipeline-number">1</div>
-                    <div>
-                        <div class="pipeline-step-title">Patient Query</div>
-                        <div class="pipeline-step-desc">
-                            English symptoms / clinical complaint
-                        </div>
+            <div class="pipeline-title">Retrieval Pipeline</div>
+            <div class="pipeline-step">
+                <div class="pipeline-number">01</div>
+                <div>
+                    <div class="pipeline-step-title">Patient Query</div>
+                    <div class="pipeline-step-desc">
+                        English symptoms / clinical complaint
                     </div>
                 </div>
-                <div class="pipeline-arrow">↓</div>
-                <div class="pipeline-step">
-                    <div class="pipeline-number">2</div>
-                    <div>
-                        <div class="pipeline-step-title">JinaColBERT-v2</div>
-                        <div class="pipeline-step-desc">
-                            Semantic retrieval
-                        </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-number">02</div>
+                <div>
+                    <div class="pipeline-step-title">JinaColBERT-v2</div>
+                    <div class="pipeline-step-desc">
+                        Semantic retrieval
                     </div>
                 </div>
-                <div class="pipeline-arrow">↓</div>
-                <div class="pipeline-step">
-                    <div class="pipeline-number">3</div>
-                    <div>
-                        <div class="pipeline-step-title">MaxSim</div>
-                        <div class="pipeline-step-desc">
-                            Passage relevance scoring
-                        </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-number">03</div>
+                <div>
+                    <div class="pipeline-step-title">MaxSim</div>
+                    <div class="pipeline-step-desc">
+                        Passage relevance scoring
                     </div>
                 </div>
-                <div class="pipeline-arrow">↓</div>
-                <div class="pipeline-step">
-                    <div class="pipeline-number">4</div>
-                    <div>
-                        <div class="pipeline-step-title">Ranked Verse IDs</div>
-                        <div class="pipeline-step-desc">
-                            Results ordered by relevance
-                        </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-number">04</div>
+                <div>
+                    <div class="pipeline-step-title">Ranked Verse IDs</div>
+                    <div class="pipeline-step-desc">
+                        Results ordered by relevance
                     </div>
                 </div>
-                <div class="pipeline-arrow">↓</div>
-                <div class="pipeline-step">
-                    <div class="pipeline-number">5</div>
-                    <div>
-                        <div class="pipeline-step-title">Corpus Lookup</div>
-                        <div class="pipeline-step-desc">
-                            Retrieve passages from Charaka Samhita
-                        </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-number">05</div>
+                <div>
+                    <div class="pipeline-step-title">Corpus Lookup</div>
+                    <div class="pipeline-step-desc">
+                        Retrieve passages from Charaka Samhita
                     </div>
                 </div>
             </div>
@@ -512,7 +667,7 @@ def main() -> None:
         key=QUERY_INPUT_KEY,
     )
 
-    search_clicked = st.button("🔎 Retrieve Relevant Knowledge", type="primary")
+    search_clicked = st.button("Retrieve Relevant Knowledge", type="primary")
 
     # Run a new search only when the search button itself was just clicked.
     # Any OTHER widget (e.g. the "Copy as JSON" button) also triggers a full
@@ -550,13 +705,13 @@ def main() -> None:
     results = st.session_state.get("last_results")
     if results:
         st.markdown(
-            f'<div class="ayur-status">✅ Completed in '
+            f'<div class="ayur-status">Completed in '
             f'<b>{st.session_state["last_elapsed"]:0.1f}s</b> '
             f'&nbsp;·&nbsp; finished at <b>{st.session_state["last_completed_at"]}</b></div>',
             unsafe_allow_html=True,
         )
 
-        st.subheader(f"🌱 Top {len(results)} results")
+        st.subheader(f"Top {len(results)} Results")
 
         render_export_bar(results, st.session_state.get("last_query", query))
 
